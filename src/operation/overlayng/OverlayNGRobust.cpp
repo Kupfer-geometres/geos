@@ -21,6 +21,7 @@
 #include <geos/operation/overlayng/OverlayNG.h>
 #include <geos/operation/overlayng/OverlayUtil.h>
 #include <geos/operation/overlayng/PrecisionUtil.h>
+#include <geos/operation/overlayng/CurveOverlayUtil.h>
 #include <geos/operation/union/UnionStrategy.h>
 #include <geos/operation/union/UnaryUnionOp.h>
 #include <geos/noding/snap/SnappingNoder.h>
@@ -83,6 +84,16 @@ OverlayNGRobust::Union(const Geometry* a)
 std::unique_ptr<Geometry>
 OverlayNGRobust::Overlay(const Geometry* geom0, const Geometry* geom1, int opCode)
 {
+
+    // Check if we have curves
+    bool hasCurves0 = CurveOverlayUtil::hasCurvedComponents(geom0);
+    bool hasCurves1 = CurveOverlayUtil::hasCurvedComponents(geom1);
+    
+    if (hasCurves0 || hasCurves1) {
+        // Call our implementation for curves
+        return CurveOverlayUtil::overlayCurves(geom0, geom1, opCode);
+    }
+
     geos::util::ensureNoCurvedComponents(geom0);
     geos::util::ensureNoCurvedComponents(geom1);
 
